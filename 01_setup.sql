@@ -1,0 +1,18 @@
+-- Set your role to the highest level
+USE ROLE ACCOUNTADMIN;
+
+-- Create a dedicated warehouse for compute
+CREATE OR REPLACE WAREHOUSE CGM_WH
+  WAREHOUSE_SIZE = 'X-SMALL'
+  AUTO_SUSPEND = 60
+  AUTO_RESUME = TRUE
+  INITIALLY_SUSPENDED = TRUE;
+  
+-- Create your database and schema
+CREATE OR REPLACE DATABASE CGM_HEALTH;
+CREATE OR REPLACE SCHEMA CGM_HEALTH.ANALYTICS;
+
+-- Tell Snowflake to use these new objects
+USE WAREHOUSE CGM_WH;
+USE DATABASE CGM_HEALTH;
+USE SCHEMA ANALYTICS;
