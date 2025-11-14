@@ -45,13 +45,26 @@ The transformation query (`03_ELT.sql`) performs the following business logic:
 * **Merging (COALESCE):** A `COALESCE` function merges the 10+ disparate note columns into a single, clean `NOTES` field.
 * **Type Casting:** All `VARCHAR` fields are safely cast to their proper data types (`TIMESTAMP_NTZ`, `NUMBER`).
 
-## 4. AI & ML Pipeline (Next Steps)
+## 4. AI & ML Pipeline
 
-With the clean `RAW_READINGS` table, the following analysis can be performed:
+With the clean `RAW_READINGS` table, the analysis pipeline can be executed.
 
-* **SQL Analysis:** Time-series analysis using window functions (`LAG`, `AVG() OVER...`) to find spikes, drops, and rolling averages.
-* **NLP Feature Engineering (Cortex AI):** A `SNOWFLAKE.CORTEX.COMPLETE` function will be used to classify the `NOTES` field into clean categories: `EATING`, `EXERCISE`, `SLEEP`, `ALCOHOL`, or `OTHER`.
-* **Anomaly Detection (Snowpark):** A Snowpark Python Stored Procedure will use `scikit-learn`'s `IsolationForest` to find "unknown unknowns"—statistically anomalous glucose events.
+### 1. SQL Analysis (Time-Series & Glycemic Variability)
+
+Time-series analysis is performed using SQL window functions (`LAG`, `AVG() OVER...`) to find spikes, drops, and rolling averages. A custom-engineered feature, `GLYCATION_INDEX`, is created using `POW(GLUCOSE_VALUE - 140, 3)` to non-linearly penalize high-excursion events, moving beyond simple averages to quantify glycemic variability.
+
+### 2. NLP Feature Engineering (Cortex AI)
+
+This step is a key example of solving a "human-in-the-loop" data problem.
+
+* **The Problem:** The source application provides rigid, structured fields for logging (e.g., `Carbohydrates (grams)`). These fields are cumbersome, forcing the user to become a data-entry clerk for their own life (e.g., "ate salad").
+* **The Human Workaround:** Like any user, I bypassed the rigid fields and logged rich, unstructured notes in the single, free-text `"Notes"` field.
+* **The `COALESCE` Solution:** The ELT pipeline first merges all 10+ note-like columns into a single `NOTES` field.
+* **The AI Solution:** A `SNOWFLAKE.CORTEX.COMPLETE` function is used to perform NLP classification on this single `NOTES` field. It transforms the unstructured "human" text ("ate salad") into the structured categorical data (`EATING`) that the original application failed to capture. This turns a messy workaround into a powerful, clean feature.
+
+### 3. Anomaly Detection (Snowpark)
+
+A Snowpark Python Stored Procedure will be used to train a `scikit-learn` **Isolation Forest** model. This model will use features like `GLUCOSE_VALUE`, `rate-of-change`, and `hour-of-day` to find "unknown unknowns"—statistically anomalous glucose events that are not simple spikes and require further investigation.
 
 ## 5. ⚠️ Privacy & Data Note
 
