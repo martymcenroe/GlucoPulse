@@ -74,4 +74,4 @@ The `.gitignore` file is configured to explicitly block this file from ever bein
 
 ## 6. License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the PolyForm Noncommercial 1.0.0. See the `LICENSE` file for details.
