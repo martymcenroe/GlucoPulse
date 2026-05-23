@@ -4,3 +4,7 @@
 
 # Unleashed session transcripts (auto-generated, untracked)
 data/unleashed/
+
+# Session logs — internal-only; never publish (fleet sweep 2026-05-23, #11)
+docs/session-logs/
+docs/dom-dumps/
